@@ -17,7 +17,7 @@
 
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
+  <script src="https://unpkg.com/lucide@latest"></script>
   <style>
 
     /* ============================================================
@@ -404,6 +404,21 @@
      border-color: var(--accent);
      color: var(--accent)
   }
+  /* Add this to your CSS to ensure icons size properly */
+    .lucide {
+      width: 1.25em;
+      height: 1.25em;
+      stroke-width: 2;
+      vertical-align: middle;
+    }
+    .nav-icon .lucide {
+      width: 22px;
+      height: 22px;
+    }
+    .bottom-nav-icon .lucide {
+      width: 20px;
+      height: 20px;
+    }
 
   /* ============================================================
    SIDEBAR
@@ -3544,8 +3559,8 @@
   <!-- ── TOP BAR ── -->
   <header id="topbar" role="banner">
     <div class="topbar-left">
-      <button id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="sidebar">
-        <span></span><span></span><span></span>
+    <button id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="sidebar">
+        <i data-lucide="menu"></i>
       </button>
       <div class="topbar-logo">GYM<span>⚡</span>TRACKER</div>
     </div>
@@ -3556,26 +3571,26 @@
         <button class="unit-toggle-btn" id="unit-lb-btn" data-unit="lb" aria-pressed="false">LB</button>
       </div>
       <button class="icon-btn" id="settings-btn" aria-label="Open settings">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        <i data-lucide="settings"></i>
       </button>
     </div>
   </header>
 
   <!-- ── SIDEBAR ── -->
   <nav id="sidebar" role="navigation" aria-label="Main navigation">
-    <ul class="sidebar-nav" role="list">
+<ul class="sidebar-nav" role="list">
       <li class="nav-section-label" role="presentation">Main</li>
-      <li class="nav-item active" data-page="home"      role="listitem" tabindex="0" aria-current="page"><span class="nav-icon">🏠</span><span class="nav-label">Dashboard</span></li>
-      <li class="nav-item"        data-page="log"       role="listitem" tabindex="0"><span class="nav-icon">💪</span><span class="nav-label">Log Workout</span></li>
-      <li class="nav-item"        data-page="progress"  role="listitem" tabindex="0"><span class="nav-icon">📊</span><span class="nav-label">Progress</span></li>
-      <li class="nav-item"        data-page="nutrition" role="listitem" tabindex="0"><span class="nav-icon">🍎</span><span class="nav-label">Nutrition</span></li>
+      <li class="nav-item active" data-page="home"      role="listitem" tabindex="0"><span class="nav-icon"><i data-lucide="layout-dashboard"></i></span><span class="nav-label">Dashboard</span></li>
+      <li class="nav-item"        data-page="log"       role="listitem" tabindex="0"><span class="nav-icon"><i data-lucide="dumbbell"></i></span><span class="nav-label">Log Workout</span></li>
+      <li class="nav-item"        data-page="progress"  role="listitem" tabindex="0"><span class="nav-icon"><i data-lucide="line-chart"></i></span><span class="nav-label">Progress</span></li>
+      <li class="nav-item"        data-page="nutrition" role="listitem" tabindex="0"><span class="nav-icon"><i data-lucide="utensils"></i></span><span class="nav-label">Nutrition</span></li>
       <li class="nav-section-label" role="presentation">Training</li>
-      <li class="nav-item"        data-page="splits"    role="listitem" tabindex="0"><span class="nav-icon">⚙️</span><span class="nav-label">Splits</span></li>
-      <li class="nav-item"        data-page="exercises" role="listitem" tabindex="0"><span class="nav-icon">🔍</span><span class="nav-label">Exercises</span></li>
+      <li class="nav-item"        data-page="splits"    role="listitem" tabindex="0"><span class="nav-icon"><i data-lucide="layout-list"></i></span><span class="nav-label">Splits</span></li>
+      <li class="nav-item"        data-page="exercises" role="listitem" tabindex="0"><span class="nav-icon"><i data-lucide="search"></i></span><span class="nav-label">Exercises</span></li>
       <li class="nav-section-label" role="presentation">Tools</li>
-      <li class="nav-item"        data-page="ai"        role="listitem" tabindex="0"><span class="nav-icon">🤖</span><span class="nav-label">AI Generator</span></li>
-      <li class="nav-item"        data-page="settings"  role="listitem" tabindex="0"><span class="nav-icon">🔧</span><span class="nav-label">Settings</span></li>
-      <li class="nav-item"        data-page="profile"   role="listitem" tabindex="0"><span class="nav-icon">👤</span><span class="nav-label">Profile</span></li>
+      <li class="nav-item"        data-page="ai"        role="listitem" tabindex="0"><span class="nav-icon"><i data-lucide="bot"></i></span><span class="nav-label">AI Generator</span></li>
+      <li class="nav-item"        data-page="settings"  role="listitem" tabindex="0"><span class="nav-icon"><i data-lucide="settings"></i></span><span class="nav-label">Settings</span></li>
+      <li class="nav-item"        data-page="profile"   role="listitem" tabindex="0"><span class="nav-icon"><i data-lucide="user"></i></span><span class="nav-label">Profile</span></li>
     </ul>
     <div class="sidebar-footer">
       <div class="sidebar-user">
@@ -4101,14 +4116,32 @@
             <div><div class="settings-row-label">Default Weight Unit</div><div class="settings-row-sub">KG or LB for all logging</div></div>
             <div class="kg-lb-toggle"><button class="kg-lb-btn active" id="set-unit-kg" data-settings-unit="kg">KG</button><button class="kg-lb-btn" id="set-unit-lb" data-settings-unit="lb">LB</button></div>
           </div>
-          <div class="settings-row">
-            <div><div class="settings-row-label">Gemini API Key</div><div class="settings-row-sub">Required for AI features</div></div>
-            <div></div>
-          </div>
-          <div class="form-group"><input type="password" class="form-input form-input-sm" id="set-api-key" placeholder="AIza…" autocomplete="off" /></div>
-          <p class="text-xs text-muted">Your key is stored in localStorage only and never sent to any server other than Google's Gemini API.</p>
+         <div class="settings-row">
+        <div>
+          <div class="settings-row-label">Backend Database URL</div>
+          <div class="settings-row-sub">Your deployed Google Apps Script Web App URL</div>
         </div>
       </div>
+
+      <div class="form-group">
+        <input type="url" class="form-input form-input-sm" id="set-gas-url"
+          placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off" />
+      </div>
+      <div class="form-group">
+        <input type="password" class="form-input form-input-sm" id="set-api-key"
+          placeholder="AIza…" autocomplete="off" />
+      </div>
+
+      <div>
+        <p class="text-xs text-muted mt-8">
+          Your URL and API key are stored in your browser's local storage only. 
+          They are never sent anywhere except directly to Google's servers.
+        </p>
+      </div>
+
+      <p class="text-xs text-muted">
+        Your key is stored in localStorage only and never sent to any server other than Google's Gemini API.
+      </p>
       <div class="settings-section">
         <div class="settings-section-header">App Info</div>
         <div class="settings-section-body">
@@ -4197,12 +4230,12 @@
   </main><!-- /#main -->
 
   <!-- ── BOTTOM NAV (mobile) ── -->
-  <nav id="bottom-nav" role="navigation" aria-label="Mobile navigation">
-    <button class="bottom-nav-item active" data-page="home" aria-label="Dashboard" aria-current="page"><span class="bottom-nav-icon">🏠</span><span class="bottom-nav-label">Home</span></button>
-    <button class="bottom-nav-item" data-page="log"       aria-label="Log Workout"><span class="bottom-nav-icon">💪</span><span class="bottom-nav-label">Log</span></button>
-    <button class="bottom-nav-item" data-page="progress"  aria-label="Progress"><span class="bottom-nav-icon">📊</span><span class="bottom-nav-label">Progress</span></button>
-    <button class="bottom-nav-item" data-page="nutrition" aria-label="Nutrition"><span class="bottom-nav-icon">🍎</span><span class="bottom-nav-label">Nutrition</span></button>
-    <button class="bottom-nav-item" data-page="exercises" aria-label="Exercises"><span class="bottom-nav-icon">🔍</span><span class="bottom-nav-label">Exercises</span></button>
+<nav id="bottom-nav" role="navigation" aria-label="Mobile navigation">
+    <button class="bottom-nav-item active" data-page="home" aria-label="Dashboard"><span class="bottom-nav-icon"><i data-lucide="layout-dashboard"></i></span><span class="bottom-nav-label">Home</span></button>
+    <button class="bottom-nav-item" data-page="log"       aria-label="Log Workout"><span class="bottom-nav-icon"><i data-lucide="dumbbell"></i></span><span class="bottom-nav-label">Log</span></button>
+    <button class="bottom-nav-item" data-page="progress"  aria-label="Progress"><span class="bottom-nav-icon"><i data-lucide="line-chart"></i></span><span class="bottom-nav-label">Progress</span></button>
+    <button class="bottom-nav-item" data-page="nutrition" aria-label="Nutrition"><span class="bottom-nav-icon"><i data-lucide="utensils"></i></span><span class="bottom-nav-label">Nutrition</span></button>
+    <button class="bottom-nav-item" data-page="exercises" aria-label="Exercises"><span class="bottom-nav-icon"><i data-lucide="search"></i></span><span class="bottom-nav-label">Exercises</span></button>
   </nav>
 
 </div><!-- /#app -->
@@ -4409,34 +4442,39 @@
    when running outside a deployed GAS web-app (e.g. local preview).
 ================================================================ */
 var API = (function () {
-
-  var _isGAS = (typeof google !== 'undefined' && google.script && google.script.run);
-
   function call(action, data) {
     return new Promise(function (resolve, reject) {
+      // 1. Fetch the URL dynamically from local storage
+      var GAS_URL = State.get('gasUrl');
+      
+      // 2. Block the request if the URL isn't configured
+      if (!GAS_URL) {
+        return reject(new Error('Backend URL missing. Please add your GAS Web App URL in Settings.'));
+      }
+
       var payload = { action: action, data: data || {} };
 
-      if (_isGAS) {
-        google.script.run
-          .withSuccessHandler(function (res) {
-            if (res && res.status === 'ok') {
-              resolve(res.data);
-            } else {
-              reject(new Error((res && res.message) || 'Unknown GAS error'));
-            }
-          })
-          .withFailureHandler(function (err) {
-            reject(new Error(err.message || String(err)));
-          })
-          .handlePost(payload);
-      } else {
-        setTimeout(function () {
-          try { resolve(_mock(action, data || {})); }
-          catch(e) { reject(e); }
-        }, 320);
-      }
+      fetch(GAS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' }, 
+        body: JSON.stringify(payload)
+      })
+      .then(function(response) {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+      })
+      .then(function(res) {
+        if (res && res.status === 'ok') {
+          resolve(res.data);
+        } else {
+          reject(new Error((res && res.message) || 'Unknown backend error'));
+        }
+      })
+      .catch(function(err) {
+        reject(new Error(err.message || String(err)));
+      });
     });
-  }
+  };
 
   /* ── LOCAL MOCK DATA ── */
   var _mockSplits = [
@@ -7556,37 +7594,79 @@ Pages.settings=(function(){
     document.getElementById('set-email').value=u.email||'';
     document.getElementById('set-goal').value=u.goal||'Build Muscle';
     document.getElementById('set-equipment').value=u.equipment||'Full Gym';
-    var splits=State.get('splits')||[];
-    var sel=document.getElementById('set-active-split');
-    sel.innerHTML='<option value="">— None selected —</option>';
-    splits.forEach(function(s){var o=document.createElement('option');o.value=s.splitName;o.textContent=s.splitName;if(s.splitName===u.currentSplit)o.selected=true;sel.appendChild(o);});
-    if(!splits.length)API.call('getSplits').then(function(d){d=d||[];d.forEach(function(s){var o=document.createElement('option');o.value=s.splitName;o.textContent=s.splitName;if(s.splitName===u.currentSplit)o.selected=true;sel.appendChild(o);});});
+// Load local storage keys
+    document.getElementById('set-gas-url').value = State.get('gasUrl') || '';
+    /* document.getElementById('set-api-key').value = State.get('apiKey') || '';*/
+
+    var splits = State.get('splits') || [];
+    var sel = document.getElementById('set-active-split');
+    sel.innerHTML = '<option value="">— None selected —</option>';
+    splits.forEach(function(s){
+      var o = document.createElement('option');
+      o.value = s.splitName;
+      o.textContent = s.splitName;
+      if(s.splitName === u.currentSplit) o.selected = true;
+      sel.appendChild(o);
+    });
+    if(!splits.length) {
+      // Note: This API call will fail if GAS URL isn't set yet, which is expected behavior
+      API.call('getSplits').then(function(d){
+        d = d || [];
+        d.forEach(function(s){
+          var o = document.createElement('option');
+          o.value = s.splitName;
+          o.textContent = s.splitName;
+          if(s.splitName === u.currentSplit) o.selected = true;
+          sel.appendChild(o);
+        });
+      }).catch(function(){}); 
+    }
   }
-  return{load:load};
+  return { load: load };
 })();
 
 document.getElementById('save-settings-btn').addEventListener('click',function(){
-  var name=document.getElementById('set-name').value.trim()||'Athlete';
-  var email=document.getElementById('set-email').value.trim();
-  var goal=document.getElementById('set-goal').value;
-  var equipment=document.getElementById('set-equipment').value;
-  var split=document.getElementById('set-active-split').value;
-  var restore=btnLoading(document.getElementById('save-settings-btn'));
-  // Code.gs saveUser only persists name, goal, currentSplit — email/equipment are local-only
-  API.call('saveUser',{name:name,goal:goal,currentSplit:split}).then(function(){
-    restore();var u=State.get('user')||{};Object.assign(u,{name:name,email:email,goal:goal,equipment:equipment,currentSplit:split});State.set('user',u);
-    document.getElementById('sidebar-user-name').textContent=name;document.getElementById('sidebar-user-goal').textContent=goal;document.getElementById('sidebar-avatar-letter').textContent=name[0].toUpperCase();document.getElementById('home-user-name').textContent=name.toUpperCase();
-    Toast.success('Settings saved! \u2705');
-  }).catch(function(e){restore();Toast.error('Save failed: '+e.message);});
-});
+  var name = document.getElementById('set-name').value.trim() || 'Athlete';
+  var email = document.getElementById('set-email').value.trim();
+  var goal = document.getElementById('set-goal').value;
+  var equipment = document.getElementById('set-equipment').value;
+  var split = document.getElementById('set-active-split').value;
+  
+  // Save local configuration keys
+  var gasUrl = document.getElementById('set-gas-url').value.trim();
+  /*var apiKey = document.getElementById('set-api-key').value.trim();*/
+  State.set('gasUrl', gasUrl);
+  /*State.set('apiKey', apiKey);*/
 
-document.getElementById('setup-sheets-btn').addEventListener('click',function(){
-  showConfirm('This will create all 5 sheets with sample data. Only run on first setup or to reset.','Run Setup').then(function(ok){
-    if(!ok)return;var restore=btnLoading(document.getElementById('setup-sheets-btn'));
-    API.call('setupSheets').then(function(r){restore();Toast.success(r.message||'Setup complete!');}).catch(function(e){restore();Toast.error('Setup failed: '+e.message);});
-  });
+  var restore = btnLoading(document.getElementById('save-settings-btn'));
+  
+  // Only attempt to save the user profile if the GAS URL is actually provided
+  if (gasUrl) {
+    API.call('saveUser', {name: name, goal: goal, currentSplit: split}).then(function(){
+      restore();
+      var u = State.get('user') || {};
+      Object.assign(u, {name: name, email: email, goal: goal, equipment: equipment, currentSplit: split});
+      State.set('user', u);
+      document.getElementById('sidebar-user-name').textContent = name;
+      document.getElementById('sidebar-user-goal').textContent = goal;
+      document.getElementById('sidebar-avatar-letter').textContent = name[0].toUpperCase();
+      document.getElementById('home-user-name').textContent = name.toUpperCase();
+      Toast.success('Settings saved! ✅');
+    }).catch(function(e){
+      restore();
+      Toast.error('Save failed: ' + e.message);
+    });
+  } else {
+    // If no URL, just save the local UI state and stop
+    restore();
+    var u = State.get('user') || {};
+    Object.assign(u, {name: name, email: email, goal: goal, equipment: equipment, currentSplit: split});
+    State.set('user', u);
+    document.getElementById('sidebar-user-name').textContent = name;
+    document.getElementById('sidebar-avatar-letter').textContent = name[0].toUpperCase();
+    Toast.info('Local settings saved. Add Backend URL to sync.');
+  }
 });
-
 /* ================================================================
    20. PAGE — PROFILE (CORRECTED)
 ================================================================ */
@@ -7826,7 +7906,7 @@ var SyncQueue = (function() {
   // 3. Initialize core systems
   Units.init();
   Nav.init();
-
+  lucide.createIcons();
   // 4. Preload the exercise library (so Video Player works instantly)
   // Assumes ExerciseLibrary was ported in your 18-20 batch, if not, it will silently fail safely.
   if (typeof ExerciseLibrary !== 'undefined' && ExerciseLibrary.preload) {
