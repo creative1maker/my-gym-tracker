@@ -3550,6 +3550,19 @@
      justify-content: flex-end;
      margin-top: 8px;
   }
+
+  /* AI Analysis panel in Workout History */
+  #ai-analysis-panel {
+    animation: fadeSlideIn var(--dur-base) var(--ease) both;
+  }
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  #ai-analyze-btn:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+  }
   </style>
 </head>
 <body>
@@ -3566,10 +3579,6 @@
     </div>
     <div class="topbar-right">
       <span id="page-title">HOME</span>
-      <div class="unit-toggle" role="group" aria-label="Weight unit">
-        <button class="unit-toggle-btn active" id="unit-kg-btn" data-unit="kg" aria-pressed="true">KG</button>
-        <button class="unit-toggle-btn" id="unit-lb-btn" data-unit="lb" aria-pressed="false">LB</button>
-      </div>
       <button class="icon-btn" id="settings-btn" aria-label="Open settings">
         <i data-lucide="settings"></i>
       </button>
@@ -3585,8 +3594,9 @@
       <li class="nav-item"        data-page="progress"  role="listitem" tabindex="0"><span class="nav-icon"><i data-lucide="line-chart"></i></span><span class="nav-label">Progress</span></li>
       <li class="nav-item"        data-page="nutrition" role="listitem" tabindex="0"><span class="nav-icon"><i data-lucide="utensils"></i></span><span class="nav-label">Nutrition</span></li>
       <li class="nav-section-label" role="presentation">Training</li>
-      <li class="nav-item"        data-page="splits"    role="listitem" tabindex="0"><span class="nav-icon"><i data-lucide="layout-list"></i></span><span class="nav-label">Splits</span></li>
-      <li class="nav-item"        data-page="exercises" role="listitem" tabindex="0"><span class="nav-icon"><i data-lucide="search"></i></span><span class="nav-label">Exercises</span></li>
+      <li class="nav-item"        data-page="splits"          role="listitem" tabindex="0"><span class="nav-icon"><i data-lucide="layout-list"></i></span><span class="nav-label">Splits</span></li>
+      <li class="nav-item"        data-page="exercises"       role="listitem" tabindex="0"><span class="nav-icon"><i data-lucide="search"></i></span><span class="nav-label">Exercises</span></li>
+      <li class="nav-item"        data-page="workout-history" role="listitem" tabindex="0"><span class="nav-icon"><i data-lucide="history"></i></span><span class="nav-label">History</span></li>
       <li class="nav-section-label" role="presentation">Tools</li>
       <li class="nav-item"        data-page="ai"        role="listitem" tabindex="0"><span class="nav-icon"><i data-lucide="bot"></i></span><span class="nav-label">AI Generator</span></li>
       <li class="nav-item"        data-page="settings"  role="listitem" tabindex="0"><span class="nav-icon"><i data-lucide="settings"></i></span><span class="nav-label">Settings</span></li>
@@ -4104,11 +4114,39 @@
         </div>
       </div>
       <div class="settings-section">
-        <div class="settings-section-header">Active Split</div>
+        <div class="settings-section-header">Starting Weight</div>
+        <div class="settings-section-body">
+          <p class="text-xs text-secondary" style="margin-bottom:12px;">Set your baseline weight. This replaces the dummy data in the Progress chart and is saved as your first progress entry.</p>
+          <div class="form-row form-row-2">
+            <div class="form-group">
+              <label class="form-label" for="set-start-date">Date</label>
+              <input type="date" class="form-input" id="set-start-date" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="set-start-weight">Weight</label>
+              <input type="number" class="form-input" id="set-start-weight" placeholder="e.g. 82.5" step="0.1" min="20" max="400" />
+            </div>
+          </div>
+          <div class="settings-row" style="margin-bottom:8px;">
+            <div><div class="settings-row-label">Unit</div></div>
+            <div class="kg-lb-toggle">
+              <button class="kg-lb-btn" id="sw-unit-kg" data-sw-unit="kg">KG</button>
+              <button class="kg-lb-btn" id="sw-unit-lb" data-sw-unit="lb">LB</button>
+            </div>
+
+            <div class="kg-lb-toggle">
+              <button class="kg-lb-btn" id="sw-unit-kg" data-unit="kg">KG</button>
+              <button class="kg-lb-btn" id="sw-unit-lb" data-unit="lb">LB</button>
+            </div>
+          </div>
+          <button class="btn btn-secondary btn-full btn-sm" id="save-start-weight-btn"><span class="btn-text">💾 Save Starting Weight</span></button>
+          <div class="divider" style="margin:12px 0;"></div>
+          <button class="btn btn-danger btn-sm" id="clear-weight-history-btn" style="width:100%;">🗑 Clear All Weight History</button>
+        </div>
+      </div>
         <div class="settings-section-body">
           <div class="form-group"><label class="form-label" for="set-active-split">Current Split</label><select class="form-input" id="set-active-split"><option value="">— None selected —</option></select></div>
         </div>
-      </div>
       <div class="settings-section">
         <div class="settings-section-header">Units &amp; Display</div>
         <div class="settings-section-body">
@@ -4127,29 +4165,25 @@
         <input type="url" class="form-input form-input-sm" id="set-gas-url"
           placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off" />
       </div>
-      <div class="form-group">
-        <input type="password" class="form-input form-input-sm" id="set-api-key"
-          placeholder="AIza…" autocomplete="off" />
-      </div>
-
       <div>
         <p class="text-xs text-muted mt-8">
-          Your URL and API key are stored in your browser's local storage only. 
-          They are never sent anywhere except directly to Google's servers.
+          Your URL is stored in your browser's local storage only. 
+          It is never sent anywhere except directly to Google's servers.
         </p>
       </div>
-
-      <p class="text-xs text-muted">
-        Your key is stored in localStorage only and never sent to any server other than Google's Gemini API.
-      </p>
       <div class="settings-section">
         <div class="settings-section-header">App Info</div>
         <div class="settings-section-body">
-          <div class="settings-row"><div class="settings-row-label">Version</div><span class="font-mono text-xs">3.0.0</span></div>
+          <div class="settings-row"><div class="settings-row-label">Version</div><span class="font-mono text-xs">3.1.0</span></div>
           <div class="settings-row"><div class="settings-row-label">Backend</div><span class="font-mono text-xs">Google Apps Script</span></div>
-          <div class="settings-row"><div class="settings-row-label">AI Model</div><span class="font-mono text-xs">Gemini 1.5 Flash</span></div>
-          <div class="divider" style="margin:4px 0;"></div>
-          <button class="btn btn-danger btn-sm" id="setup-sheets-btn">🔧 Run Setup / Reset Sheets</button>
+          <div class="settings-row"><div class="settings-row-label">AI Model</div><span class="font-mono text-xs">Gemini 2.5 Flash</span></div>
+          <div class="divider" style="margin:8px 0;"></div>
+          <button class="btn btn-secondary btn-sm" id="test-connection-btn" style="width:100%;margin-bottom:6px;">🔌 Test Backend Connection</button>
+          <button class="btn btn-danger btn-sm" id="setup-sheets-btn" style="width:100%;">🔧 Run Setup / Reset Sheets</button>
+          <div id="debug-panel" style="display:none;margin-top:12px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px;">
+            <div class="font-mono text-xs text-muted" style="margin-bottom:6px;">LAST API RESPONSE</div>
+            <pre id="debug-output" style="font-size:.7rem;color:var(--text-secondary);white-space:pre-wrap;word-break:break-all;max-height:180px;overflow-y:auto;margin:0;"></pre>
+          </div>
         </div>
       </div>
       <button class="btn btn-primary btn-full btn-lg" id="save-settings-btn"><span class="btn-text">💾 Save Settings</span></button>
@@ -4209,11 +4243,19 @@
       </div>
 
       <div class="card mb-16">
-        <div class="card-header"><span class="card-title">SESSION LOG</span></div>
-        <div class="card-body" style="background: var(--bg-surface);">
-          <div class="stats-row" id="history-scorecards" style="display:flex; flex-wrap:wrap; gap:12px;">
-            <div class="text-sm text-muted">Select a date to view exercises.</div>
+        <div class="card-header" style="justify-content:space-between;align-items:center;">
+          <span class="card-title">SESSION LOG</span>
+          <button class="btn btn-sm" id="ai-analyze-btn" style="display:none;background:linear-gradient(135deg,var(--accent) 0%,#ff9900 100%);color:#fff;gap:6px;font-size:.78rem;padding:7px 14px;border-radius:var(--radius-pill);">🤖 AI Analyze Session</button>
+        </div>
+        <div id="history-scorecards" style="min-height:56px;">
+          <div class="text-sm text-muted" style="padding:16px 16px 20px;">Select a date to view exercises.</div>
+        </div>
+        <div id="ai-analysis-panel" style="display:none;border-top:1px solid var(--border);padding:16px;background:var(--bg-elevated);border-radius:0 0 var(--radius-lg) var(--radius-lg);">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+            <span style="font-family:var(--font-mono);font-size:.68rem;letter-spacing:.1em;color:var(--accent);font-weight:700;">✨ AI COACH ANALYSIS</span>
+            <div id="ai-analysis-spinner" class="spinner" style="display:none;width:14px;height:14px;border-width:2px;"></div>
           </div>
+          <div id="ai-analysis-text" style="font-size:.875rem;line-height:1.75;color:var(--text-secondary);white-space:pre-wrap;"></div>
         </div>
       </div>
 
@@ -4231,11 +4273,11 @@
 
   <!-- ── BOTTOM NAV (mobile) ── -->
 <nav id="bottom-nav" role="navigation" aria-label="Mobile navigation">
-    <button class="bottom-nav-item active" data-page="home" aria-label="Dashboard"><span class="bottom-nav-icon"><i data-lucide="layout-dashboard"></i></span><span class="bottom-nav-label">Home</span></button>
-    <button class="bottom-nav-item" data-page="log"       aria-label="Log Workout"><span class="bottom-nav-icon"><i data-lucide="dumbbell"></i></span><span class="bottom-nav-label">Log</span></button>
-    <button class="bottom-nav-item" data-page="progress"  aria-label="Progress"><span class="bottom-nav-icon"><i data-lucide="line-chart"></i></span><span class="bottom-nav-label">Progress</span></button>
-    <button class="bottom-nav-item" data-page="nutrition" aria-label="Nutrition"><span class="bottom-nav-icon"><i data-lucide="utensils"></i></span><span class="bottom-nav-label">Nutrition</span></button>
-    <button class="bottom-nav-item" data-page="exercises" aria-label="Exercises"><span class="bottom-nav-icon"><i data-lucide="search"></i></span><span class="bottom-nav-label">Exercises</span></button>
+    <button class="bottom-nav-item active" data-page="home"            aria-label="Dashboard"><span class="bottom-nav-icon"><i data-lucide="layout-dashboard"></i></span><span class="bottom-nav-label">Home</span></button>
+    <button class="bottom-nav-item"        data-page="log"             aria-label="Log Workout"><span class="bottom-nav-icon"><i data-lucide="dumbbell"></i></span><span class="bottom-nav-label">Log</span></button>
+    <button class="bottom-nav-item"        data-page="progress"        aria-label="Progress"><span class="bottom-nav-icon"><i data-lucide="line-chart"></i></span><span class="bottom-nav-label">Progress</span></button>
+    <button class="bottom-nav-item"        data-page="workout-history" aria-label="History"><span class="bottom-nav-icon"><i data-lucide="history"></i></span><span class="bottom-nav-label">History</span></button>
+    <button class="bottom-nav-item"        data-page="nutrition"       aria-label="Nutrition"><span class="bottom-nav-icon"><i data-lucide="utensils"></i></span><span class="bottom-nav-label">Nutrition</span></button>
   </nav>
 
 </div><!-- /#app -->
@@ -4442,6 +4484,8 @@
    when running outside a deployed GAS web-app (e.g. local preview).
 ================================================================ */
 var API = (function () {
+  var _lastDebug = null;
+
   function call(action, data) {
     return new Promise(function (resolve, reject) {
       // 1. Fetch the URL dynamically from local storage
@@ -4460,10 +4504,16 @@ var API = (function () {
         body: JSON.stringify(payload)
       })
       .then(function(response) {
-        if (!response.ok) throw new Error('Network response was not ok');
-        return response.json();
+        if (!response.ok) throw new Error('HTTP ' + response.status + ' — ' + response.statusText);
+        return response.text(); // read as text first so we can debug
       })
-      .then(function(res) {
+      .then(function(text) {
+        // Log raw response for debugging (visible in Settings debug panel)
+        _lastDebug = { action: action, raw: text.substring(0, 800) };
+        var res;
+        try { res = JSON.parse(text); } catch(e) {
+          throw new Error('Non-JSON response from backend. Raw: ' + text.substring(0, 200));
+        }
         if (res && res.status === 'ok') {
           resolve(res.data);
         } else {
@@ -4471,6 +4521,7 @@ var API = (function () {
         }
       })
       .catch(function(err) {
+        _lastDebug = { action: action, error: err.message };
         reject(new Error(err.message || String(err)));
       });
     });
@@ -4738,6 +4789,7 @@ var API = (function () {
         return { ok: true };
       }
       case 'setupSheets': return { message: 'Mock: sheets would be created.' };
+      case 'clearWeightHistory': { _mockProgress.length = 0; return { cleared: true }; }
       case 'aiGenerateSplit': {
         return {
           splitName: 'AI Generated — ' + (data.prompt || 'Custom').split(',')[0],
@@ -4763,11 +4815,15 @@ var API = (function () {
           ]
         };
       }
+      case 'aiMacros': {
+        return { calories: 2650, protein: 185, carbs: 305, fats: 72,
+          rationale: 'Mock plan: adjust protein for muscle gain at moderate activity.' };
+      }
       default: throw new Error('Unknown mock action: ' + action);
     }
   }
 
-  return { call: call };
+  return { call: call, getDebug: function(){ return _lastDebug; } };
 }());
 
 
@@ -4806,6 +4862,7 @@ var State = (function () {
 ================================================================ */
 var Units = (function () {
   var _unit = 'kg'; // default
+  var _onChange = []; // callbacks to fire when unit changes
 
   function init() {
     var saved = State.get('defaultUnit') || 'kg';
@@ -4816,10 +4873,15 @@ var Units = (function () {
   function getUnit() { return _unit; }
 
   function setUnit(u) {
+    if (u === _unit) return; // no change — skip re-renders
     _unit = u;
     State.set('defaultUnit', u);
     _updateAllToggles();
+    // Notify listeners (e.g. home page re-renders weight values)
+    _onChange.forEach(function(fn){ try { fn(u); } catch(e){} });
   }
+
+  function onChange(fn) { _onChange.push(fn); }
 
   function toDisplay(kg) {
     if (_unit === 'lb') return +(kg * 2.20462).toFixed(1);
@@ -4872,7 +4934,8 @@ var Units = (function () {
   return { 
     init: init, 
     getUnit: getUnit, 
-    setUnit: setUnit, 
+    setUnit: setUnit,
+    onChange: onChange,
     toDisplay: toDisplay, 
     toKg: toKg, 
     label: label 
@@ -5019,9 +5082,12 @@ function todayLong() {
 
 function formatDate(dateStr) {
   if (!dateStr) return '—';
-  // Append a fake time string (T00:00:00) to ensure the JS Date object
-  // processes it as local time rather than shifting to UTC and rendering the day prior
-  var d = new Date(dateStr + 'T00:00:00');
+  // Strip time portion from ISO strings (e.g. "2025-04-18T00:00:00.000Z" → "2025-04-18")
+  // This fixes the "Invalid Date" bug caused by GAS returning full ISO datetime strings
+  // which, when re-appended with "T00:00:00", produced "2025-04-18T00:00:00.000ZT00:00:00"
+  var s = String(dateStr).split('T')[0];
+  var d = new Date(s + 'T00:00:00');
+  if (isNaN(d.getTime())) return String(dateStr); // graceful fallback
   return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }
 
@@ -5032,16 +5098,16 @@ var Nav = (function () {
   var _current = 'home';
 
   var _pageTitles = {
-    home:       'HOME',
-    log:        'LOG WORKOUT',
-    progress:   'PROGRESS',
-    nutrition:  'NUTRITION',
-    splits:     'SPLITS',
-    exercises:  'EXERCISES',
-    ai:         'AI GENERATOR',
-    settings:   'SETTINGS',
-    profile:    'PROFILE',
-    'workout-history':  'WORKOUT HISTORY' // <-- Add this line
+    home:            'HOME',
+    log:             'LOG WORKOUT',
+    progress:        'PROGRESS',
+    nutrition:       'NUTRITION',
+    splits:          'SPLITS',
+    exercises:       'EXERCISES',
+    ai:              'AI GENERATOR',
+    settings:        'SETTINGS',
+    profile:         'PROFILE',
+    'workout-history': 'WORKOUT HISTORY'
   };
 
   function init() {
@@ -5355,6 +5421,12 @@ Pages.home = (function () {
   // We only want to attach the delete listener to the recent workouts list once
   var _listListenerAttached = false;
 
+  // When unit changes, re-render weight values live without full reload
+  Units.onChange(function() {
+    var cached = State.get('dashboardSummary');
+    if (cached) _renderWeightStats(cached);
+  });
+
   function load() {
     var cached = State.get('dashboardSummary');
     if (cached) { _render(cached); }
@@ -5376,7 +5448,7 @@ Pages.home = (function () {
   function _render(data) {
     if (!data) return;
 
-    // User
+    // User info — do NOT call Units.setUnit here; unit is driven by the toggle & localStorage
     var user = data.user || {};
     document.getElementById('home-user-name').textContent = (user.name || 'ATHLETE').toUpperCase();
     document.getElementById('sidebar-user-name').textContent = user.name || 'Athlete';
@@ -5384,14 +5456,14 @@ Pages.home = (function () {
     document.getElementById('sidebar-avatar-letter').textContent = (user.name || 'A')[0].toUpperCase();
     State.set('user', user);
 
-    // Apply saved unit
-    if (user.defaultUnit) Units.setUnit(user.defaultUnit);
+    // If this is the very first load and no unit has been set by the user yet,
+    // apply the unit stored in the user profile (only on cold start)
+    if (user.defaultUnit && !State.get('_unitInitialized')) {
+      State.set('_unitInitialized', true);
+      Units.setUnit(user.defaultUnit);
+    }
 
-    // Stats
-    document.getElementById('stat-sessions').textContent = data.totalWorkoutDays || '0';
-    var latestW = data.latestWeight;
-    document.getElementById('stat-weight').textContent = latestW ? Units.toDisplay(latestW) + ' ' + Units.label() : '—';
-    document.getElementById('stat-last-log').textContent = data.recentWorkout ? formatDate(data.recentWorkout) : '—';
+    _renderWeightStats(data);
 
     // Active split
     var split = data.currentSplit;
@@ -5405,8 +5477,6 @@ Pages.home = (function () {
                '<span class="split-day-chip-count">' + (day.exercises || []).length + ' exercises</span>' +
                '</div>';
       }).join('');
-      
-      // Wire quick-log navigation for split chips to pass the target day
       daysEl.querySelectorAll('.split-day-chip').forEach(function(el){
         el.addEventListener('click', function(){ 
           State.set('targetLogDay', parseInt(this.dataset.dayTarget, 10));
@@ -5420,6 +5490,22 @@ Pages.home = (function () {
         '<div class="empty-state" style="padding:12px 16px;"><span class="empty-state-text">Set a split in Settings ⚙️</span></div>';
     }
 
+    // Recent workouts
+    _renderRecent(data.recentWorkouts || []);
+
+    // Cache splits for other pages
+    if (data.splits) State.set('splits', data.splits);
+  }
+
+  // Extracted so the unit-change handler can call it independently
+  function _renderWeightStats(data) {
+    // Stats
+    document.getElementById('stat-sessions').textContent = data.totalWorkoutDays || '0';
+    var latestW = data.latestWeight;
+    document.getElementById('stat-weight').textContent = latestW ? Units.toDisplay(latestW) + ' ' + Units.label() : '—';
+    document.getElementById('stat-last-log').textContent = data.recentWorkout ? formatDate(data.recentWorkout) : '—';
+    document.getElementById('stat-weight-unit').textContent = Units.label() + ' · latest';
+
     // Weight chart
     var prog = data.progressData || [];
     if (prog.length) {
@@ -5432,12 +5518,6 @@ Pages.home = (function () {
       var sign  = delta > 0 ? '+' : '';
       document.getElementById('home-weight-change').textContent = sign + Units.toDisplay(delta) + ' ' + Units.label();
     }
-
-    // Recent workouts
-    _renderRecent(data.recentWorkouts || []);
-
-    // Cache splits for other pages
-    if (data.splits) State.set('splits', data.splits);
   }
 
   function _renderRecent(workouts) {
@@ -5448,40 +5528,39 @@ Pages.home = (function () {
       el.innerHTML = '<li class="recent-workout-row"><div class="empty-state" style="width:100%"><span class="empty-state-icon">📋</span><span class="empty-state-text">No workouts yet. Hit the gym!</span></div></li>';
       return;
     }
-    
-    el.innerHTML = workouts.slice(0, 5).map(function (w, i) {
-      return '<li class="recent-workout-row">' +
-             '<div class="recent-workout-info">' +
-             '<div class="recent-workout-exercise">' + esc(w.exercise) + '</div>' +
-             '<div class="recent-workout-meta">' + esc(w.splitDay) + ' · ' + formatDate(w.date) + '</div>' +
-             '</div>' +
-             '<div style="display:flex; align-items:center; gap:12px;">' +
-             '<div class="recent-workout-weight">' + (w.weight ? Units.toDisplay(w.weight) + Units.label() : w.sets + '×' + w.reps) + '</div>' +
-             '<button class="btn btn-ghost btn-sm" data-delete-row="' + (w._rowIndex || i) + '" style="color:var(--text-muted); font-size:0.8rem; padding:4px;">✕</button>' +
-             '</div>' +
-             '</li>';
-    }).join('');
 
-    // Attach delegated delete listener once
-    if (!_listListenerAttached) {
-      el.addEventListener('click', function(e) {
-        var btn = e.target.closest('[data-delete-row]');
-        if (!btn) return;
-        var rowIndex = parseInt(btn.dataset.deleteRow, 10);
-        
-        showConfirm('Remove this workout entry?', 'Delete').then(function(ok) {
-          if (!ok) return;
-          API.call('deleteWorkout', { rowIndex: rowIndex }).then(function() {
-            Toast.success('Entry removed.');
-            State.remove('dashboardSummary'); // Force a fresh fetch
-            load();
-          }).catch(function(err) { 
-            Toast.error('Delete failed: ' + err.message); 
-          });
-        });
-      });
-      _listListenerAttached = true;
-    }
+    // Group by date + splitDay so each session is one block
+    var sessions = [];
+    var seen = {};
+    workouts.forEach(function(w) {
+      var key = (w.date || '') + '|' + (w.splitDay || '');
+      if (!seen[key]) {
+        seen[key] = { date: w.date, splitDay: w.splitDay, exercises: [] };
+        sessions.push(seen[key]);
+      }
+      seen[key].exercises.push(w);
+    });
+    // Show most recent first, cap at 4 sessions
+    sessions.sort(function(a, b) { return a.date < b.date ? 1 : -1; });
+    sessions = sessions.slice(0, 4);
+
+    el.innerHTML = sessions.map(function(s) {
+      var exNames = s.exercises.map(function(e) { return esc(e.exercise); }).join(' · ');
+      var topEx   = s.exercises[0];
+      var wtDisplay = topEx && topEx.weight
+        ? Units.toDisplay(parseFloat(topEx.weight)) + ' ' + Units.label()
+        : s.exercises.length + ' exercises';
+      return '<li class="recent-workout-row" style="flex-direction:column;align-items:flex-start;gap:6px;padding:12px 16px;">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;width:100%;">' +
+          '<div>' +
+            '<div class="recent-workout-exercise" style="font-size:.95rem;">' + esc(s.splitDay || 'Custom') + '</div>' +
+            '<div class="recent-workout-meta">' + formatDate(s.date) + ' &nbsp;·&nbsp; ' + s.exercises.length + ' exercise' + (s.exercises.length !== 1 ? 's' : '') + '</div>' +
+          '</div>' +
+          '<div class="recent-workout-weight" style="white-space:nowrap;">' + wtDisplay + '</div>' +
+        '</div>' +
+        '<div style="font-size:.78rem;color:var(--text-muted);line-height:1.5;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + exNames + '</div>' +
+      '</li>';
+    }).join('');
   }
 
   return { load: load };
@@ -5773,11 +5852,10 @@ Pages.log = (function () {
     changeDayBtn.addEventListener('click', function () {
       document.getElementById('log-exercise-form').style.display = 'none';
       document.getElementById('log-footer').style.display = 'none';
-      document.getElementById('log-step-select').style.display = 'block';
-      document.querySelectorAll('.day-option').forEach(function (opt) {
-        opt.classList.remove('selected');
-        opt.setAttribute('aria-checked', 'false');
-      });
+      document.querySelectorAll('.day-option').forEach(function(opt) {
+          opt.classList.remove('selected');
+          opt.setAttribute('aria-checked', 'false');
+        });
       _updateSteps(2);
     });
   }
@@ -6431,34 +6509,46 @@ Pages.nutrition = (function () {
         document.getElementById('macro-ai-thinking').classList.add('visible');
         var restore = btnLoading(this);
         
-        // Simulating an AI API call delay for the mock
-        setTimeout(function() {
+        API.call('aiMacros', { prompt: prompt }).then(function(result) {
           restore();
           document.getElementById('macro-ai-thinking').classList.remove('visible');
           var resBox = document.getElementById('macro-ai-result');
           resBox.style.display = 'flex';
-          resBox.innerHTML = 
-            '<div class="badge badge-accent" style="align-self:flex-start;">AI Plan Generated</div>' +
-            '<p class="text-sm">Based on your prompt, here is an optimal macro split:</p>' +
+          var cal  = result.calories || 0;
+          var pro  = result.protein  || 0;
+          var carb = result.carbs    || 0;
+          var fat  = result.fats     || 0;
+          resBox.innerHTML =
+            '<div class="badge badge-accent" style="align-self:flex-start;">\u2728 AI Plan Generated</div>' +
+            (result.rationale ? '<p class="text-sm text-secondary" style="margin-top:6px;">' + esc(result.rationale) + '</p>' : '') +
             '<div class="macro-goals-grid mt-8">' +
-              '<div class="stat-card"><div class="stat-card-label">Cals</div><div class="stat-card-value">2650</div></div>' +
-              '<div class="stat-card"><div class="stat-card-label">Pro</div><div class="stat-card-value">190</div></div>' +
-              '<div class="stat-card"><div class="stat-card-label">Carb</div><div class="stat-card-value">310</div></div>' +
-              '<div class="stat-card"><div class="stat-card-label">Fat</div><div class="stat-card-value">72</div></div>' +
+              '<div class="stat-card"><div class="stat-card-label">Cals</div><div class="stat-card-value accent">' + cal  + '</div></div>' +
+              '<div class="stat-card"><div class="stat-card-label">Pro</div><div class="stat-card-value">'  + pro  + '</div></div>' +
+              '<div class="stat-card"><div class="stat-card-label">Carb</div><div class="stat-card-value">' + carb + '</div></div>' +
+              '<div class="stat-card"><div class="stat-card-label">Fat</div><div class="stat-card-value">'  + fat  + '</div></div>' +
             '</div>' +
-            '<button class="btn btn-secondary btn-sm mt-8" id="apply-ai-macros-btn">Apply as Daily Goals</button>';
+            '<button class="btn btn-secondary btn-sm mt-8" id="apply-ai-macros-btn"><span class="btn-text">Apply as Daily Goals</span></button>';
 
           document.getElementById('apply-ai-macros-btn').addEventListener('click', function() {
             var user = State.get('user') || {};
-            user.goalCalories = 2650; user.goalProtein = 190; user.goalCarbs = 310; user.goalFats = 72;
+            user.goalCalories = cal; user.goalProtein = pro; user.goalCarbs = carb; user.goalFats = fat;
+            var restoreApply = btnLoading(this);
             API.call('saveUser', user).then(function() {
+              restoreApply();
               State.set('user', user);
-              Toast.success('AI Goals Applied!');
+              Toast.success('AI Goals Applied! \uD83C\uDFAF');
               resBox.style.display = 'none';
               _renderDay(_currentDate);
+            }).catch(function(err) {
+              restoreApply();
+              Toast.error('Failed to apply goals: ' + err.message);
             });
           });
-        }, 1500);
+        }).catch(function(err) {
+          restore();
+          document.getElementById('macro-ai-thinking').classList.remove('visible');
+          Toast.error('AI error: ' + err.message);
+        });
       });
     }
 
@@ -7004,6 +7094,7 @@ Pages['workout-history'] = (function () {
   function _attachListeners() {
     document.getElementById('history-split-filter').addEventListener('change', _updateView);
     document.getElementById('history-date-filter').addEventListener('change', _updateView);
+    document.getElementById('ai-analyze-btn').addEventListener('click', _runAIAnalysis);
     _listenersAttached = true;
   }
 
@@ -7031,24 +7122,53 @@ Pages['workout-history'] = (function () {
     var dateFilter = document.getElementById('history-date-filter').value;
     var splitFilter = document.getElementById('history-split-filter').value;
 
-    // --- 1. Scorecards for Selected Date ---
+    // --- 1. Exercise list for Selected Date ---
     var dateWorkouts = _workouts.filter(function (w) { return w.date === dateFilter; });
     var scorecardsWrap = document.getElementById('history-scorecards');
-    
+    var analyzeBtn = document.getElementById('ai-analyze-btn');
+    var analysisPanel = document.getElementById('ai-analysis-panel');
+
+    // Reset AI panel when date changes
+    analysisPanel.style.display = 'none';
+    document.getElementById('ai-analysis-text').textContent = '';
+
     if (!dateWorkouts.length) {
-      scorecardsWrap.innerHTML = '<div class="text-sm text-muted">No exercises logged on this date.</div>';
+      scorecardsWrap.innerHTML = '<div class="text-sm text-muted" style="padding:16px 16px 20px;">No exercises logged on this date.</div>';
+      analyzeBtn.style.display = 'none';
     } else {
-      scorecardsWrap.innerHTML = dateWorkouts.map(function (w) {
-        var val = w.weight ? Units.toDisplay(parseFloat(w.weight)) : '—';
-        var unit = w.weight ? Units.label() : '';
-        var repsInfo = w.sets + ' × ' + w.reps;
-        
-        return '<div class="stat-card" style="flex: 1 1 140px; border-top: 3px solid var(--accent);">' +
-               '<div class="stat-card-label" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(w.exercise) + '</div>' +
-               '<div><span class="stat-card-value" style="font-size:1.6rem;">' + val + '</span> <span class="stat-card-unit">' + unit + '</span></div>' +
-               '<div class="font-mono text-xs text-muted" style="margin-top:6px;">' + esc(repsInfo) + '</div>' +
-               '</div>';
+      analyzeBtn.style.display = 'flex';
+
+      // Header row
+      var header = '<div style="display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--bg-elevated);">' +
+        '<div style="width:24px;flex-shrink:0;"></div>' +
+        '<div style="flex:1;font-family:var(--font-mono);font-size:.65rem;letter-spacing:.1em;color:var(--text-muted);text-transform:uppercase;">Exercise</div>' +
+        '<div style="width:70px;text-align:center;font-family:var(--font-mono);font-size:.65rem;letter-spacing:.1em;color:var(--text-muted);text-transform:uppercase;">Sets×Reps</div>' +
+        '<div style="width:80px;text-align:right;font-family:var(--font-mono);font-size:.65rem;letter-spacing:.1em;color:var(--text-muted);text-transform:uppercase;">Weight</div>' +
+        '</div>';
+
+      var rows = dateWorkouts.map(function (w, i) {
+        var wDisplay = w.weight ? Units.toDisplay(parseFloat(w.weight)) + ' <span style="font-size:.7rem;color:var(--text-muted);">' + Units.label() + '</span>' : '<span style="color:var(--text-muted);">BW</span>';
+        var isLast = i === dateWorkouts.length - 1;
+        return '<div style="display:flex;align-items:center;gap:12px;padding:11px 16px;' + (!isLast ? 'border-bottom:1px solid var(--border);' : '') + 'transition:background var(--dur-fast);" onmouseover="this.style.background=\'var(--bg-elevated)\'" onmouseout="this.style.background=\'\'">' +
+          '<div style="width:24px;height:24px;border-radius:50%;background:var(--accent-subtle);border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:.6rem;font-family:var(--font-mono);color:var(--accent);flex-shrink:0;font-weight:700;">' + (i + 1) + '</div>' +
+          '<div style="flex:1;min-width:0;">' +
+          '<div style="font-weight:600;font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc(w.exercise) + '</div>' +
+          (w.notes ? '<div style="font-size:.72rem;color:var(--text-muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">📝 ' + esc(w.notes) + '</div>' : '') +
+          '</div>' +
+          '<div style="width:70px;text-align:center;font-family:var(--font-mono);font-size:.8rem;color:var(--text-secondary);white-space:nowrap;">' + esc(w.sets) + ' × ' + esc(w.reps) + '</div>' +
+          '<div style="width:80px;text-align:right;font-family:var(--font-mono);font-size:.9rem;font-weight:600;color:var(--accent);white-space:nowrap;">' + wDisplay + '</div>' +
+          '</div>';
       }).join('');
+
+      // Summary footer
+      var totalSets = dateWorkouts.reduce(function(s, w) { return s + (parseInt(w.sets) || 0); }, 0);
+      var splitDays = Array.from(new Set(dateWorkouts.map(function(w){ return w.splitDay; }))).join(', ');
+      var footer = '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid var(--border);background:var(--bg-elevated);border-radius:0 0 var(--radius-lg) var(--radius-lg);">' +
+        '<span style="font-family:var(--font-mono);font-size:.7rem;color:var(--text-muted);">' + esc(splitDays) + '</span>' +
+        '<span style="font-family:var(--font-mono);font-size:.7rem;color:var(--text-muted);">' + dateWorkouts.length + ' exercises · ' + totalSets + ' total sets</span>' +
+        '</div>';
+
+      scorecardsWrap.innerHTML = header + rows + footer;
     }
 
     // --- 2. Chart: Progress over time based on Split ---
@@ -7084,6 +7204,63 @@ Pages['workout-history'] = (function () {
     } else {
        Charts.measurementsLine('history-progress-chart', [], []); // Clear chart safely
     }
+  }
+
+  function _runAIAnalysis() {
+    var dateFilter = document.getElementById('history-date-filter').value;
+    var dateWorkouts = _workouts.filter(function(w) { return w.date === dateFilter; });
+    if (!dateWorkouts.length) { Toast.error('No workout data to analyze.'); return; }
+
+    var btn = document.getElementById('ai-analyze-btn');
+    var panel = document.getElementById('ai-analysis-panel');
+    var spinner = document.getElementById('ai-analysis-spinner');
+    var textDiv = document.getElementById('ai-analysis-text');
+
+    btn.disabled = true;
+    panel.style.display = 'block';
+    spinner.style.display = 'inline-block';
+    textDiv.textContent = 'Analyzing your session…';
+
+    var splitDay = (dateWorkouts[0] && dateWorkouts[0].splitDay) ? dateWorkouts[0].splitDay : 'Custom';
+    var workoutSummary = dateWorkouts.map(function(w, i) {
+      return (i + 1) + '. ' + w.exercise + ' — ' + w.sets + ' sets × ' + w.reps + ' reps' +
+        (w.weight ? ' @ ' + Units.toDisplay(parseFloat(w.weight)) + ' ' + Units.label() : ' (bodyweight)') +
+        (w.notes ? ' [Note: ' + w.notes + ']' : '');
+    }).join('\n');
+
+    var prompt = 'You are an expert personal fitness coach. Analyze the following gym session logged on ' + dateFilter + ' (' + splitDay + ') and provide:\n' +
+      '1. A brief assessment of the session volume and intensity\n' +
+      '2. Any muscle balance or recovery observations\n' +
+      '3. One specific tip to improve next session\n' +
+      '4. A short motivational closing\n\n' +
+      'Keep it concise (under 200 words), practical, and encouraging.\n\nSession:\n' + workoutSummary;
+
+    fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      spinner.style.display = 'none';
+      btn.disabled = false;
+      if (data && data.content && data.content[0] && data.content[0].text) {
+        textDiv.textContent = data.content[0].text;
+      } else if (data && data.error) {
+        textDiv.textContent = '⚠️ API error: ' + (data.error.message || JSON.stringify(data.error));
+      } else {
+        textDiv.textContent = '⚠️ Unexpected response. Please try again.';
+      }
+    })
+    .catch(function(err) {
+      spinner.style.display = 'none';
+      btn.disabled = false;
+      textDiv.textContent = '⚠️ Could not reach AI: ' + err.message;
+    });
   }
 
   return { load: load };
@@ -7596,7 +7773,10 @@ Pages.settings=(function(){
     document.getElementById('set-equipment').value=u.equipment||'Full Gym';
 // Load local storage keys
     document.getElementById('set-gas-url').value = State.get('gasUrl') || '';
-    /* document.getElementById('set-api-key').value = State.get('apiKey') || '';*/
+
+    // Default start-weight date to today
+    var swDateEl = document.getElementById('set-start-date');
+    if (swDateEl && !swDateEl.value) swDateEl.value = todayStr();
 
     var splits = State.get('splits') || [];
     var sel = document.getElementById('set-active-split');
@@ -7608,8 +7788,35 @@ Pages.settings=(function(){
       if(s.splitName === u.currentSplit) o.selected = true;
       sel.appendChild(o);
     });
-    if(!splits.length) {
-      // Note: This API call will fail if GAS URL isn't set yet, which is expected behavior
+
+    // If GAS URL is set, fetch fresh user data from backend
+    if (State.get('gasUrl')) {
+      API.call('getUser').then(function(freshUser) {
+        if (!freshUser || !freshUser.userId) return;
+        State.set('user', freshUser);
+        document.getElementById('set-name').value      = freshUser.name      || '';
+        document.getElementById('set-email').value     = freshUser.email     || '';
+        document.getElementById('set-goal').value      = freshUser.goal      || 'Build Muscle';
+        document.getElementById('set-equipment').value = freshUser.equipment || 'Full Gym';
+        // Update active split selector
+        if (!splits.length) {
+          API.call('getSplits').then(function(d){
+            d = d || [];
+            State.set('splits', d);
+            sel.innerHTML = '<option value="">— None selected —</option>';
+            d.forEach(function(s){
+              var o = document.createElement('option');
+              o.value = s.splitName; o.textContent = s.splitName;
+              if(s.splitName === freshUser.currentSplit) o.selected = true;
+              sel.appendChild(o);
+            });
+          }).catch(function(){});
+        } else {
+          // Just update selection
+          Array.from(sel.options).forEach(function(o){ o.selected = (o.value === freshUser.currentSplit); });
+        }
+      }).catch(function(){});
+    } else if(!splits.length) {
       API.call('getSplits').then(function(d){
         d = d || [];
         d.forEach(function(s){
@@ -7619,7 +7826,7 @@ Pages.settings=(function(){
           if(s.splitName === u.currentSplit) o.selected = true;
           sel.appendChild(o);
         });
-      }).catch(function(){}); 
+      }).catch(function(){});
     }
   }
   return { load: load };
@@ -7634,9 +7841,17 @@ document.getElementById('save-settings-btn').addEventListener('click',function()
   
   // Save local configuration keys
   var gasUrl = document.getElementById('set-gas-url').value.trim();
+  var prevUrl = State.get('gasUrl');
   /*var apiKey = document.getElementById('set-api-key').value.trim();*/
   State.set('gasUrl', gasUrl);
   /*State.set('apiKey', apiKey);*/
+
+  // If backend URL changed, clear all caches so real sheet data loads immediately
+  if (gasUrl && gasUrl !== prevUrl) {
+    ['dashboardSummary','splits','exercises','progress','macros','user','workouts'].forEach(function(k){
+      State.remove(k);
+    });
+  }
 
   var restore = btnLoading(document.getElementById('save-settings-btn'));
   
@@ -7667,6 +7882,85 @@ document.getElementById('save-settings-btn').addEventListener('click',function()
     Toast.info('Local settings saved. Add Backend URL to sync.');
   }
 });
+
+/* -- Setup / Reset Sheets button -------------------------------- */
+document.getElementById('setup-sheets-btn').addEventListener('click', function() {
+  var restore = btnLoading(this);
+  API.call('setupSheets').then(function(res) {
+    restore();
+    Toast.success('\u2705 Sheets setup complete! Reloading data\u2026');
+    ['dashboardSummary','splits','exercises','progress','macros','user','workouts'].forEach(function(k){
+      State.remove(k);
+    });
+    Pages.home.load();
+  }).catch(function(err) {
+    restore();
+    Toast.error('Setup failed: ' + err.message);
+  });
+});
+
+/* -- Test Backend Connection button ----------------------------- */
+document.getElementById('test-connection-btn').addEventListener('click', function() {
+  var restore = btnLoading(this);
+  var panel = document.getElementById('debug-panel');
+  var out   = document.getElementById('debug-output');
+  panel.style.display = 'block';
+  out.textContent = 'Testing…';
+  API.call('getUser').then(function(data) {
+    restore();
+    out.textContent = '✅ SUCCESS\n' + JSON.stringify(data, null, 2);
+  }).catch(function(err) {
+    restore();
+    var d = API.getDebug();
+    out.textContent = '❌ ERROR: ' + err.message + (d ? '\n\nRaw response:\n' + (d.raw || d.error || '') : '');
+  });
+});
+
+/* -- Starting weight unit toggle -------------------------------- */
+(function() {
+  document.getElementById('save-start-weight-btn').addEventListener('click', function() {
+    var dateVal   = document.getElementById('set-start-date').value;
+    var weightVal = parseFloat(document.getElementById('set-start-weight').value);
+    
+    if (!dateVal) { Toast.error('Please enter a date.'); return; }
+    if (!weightVal || weightVal <= 0) { Toast.error('Please enter a valid weight.'); return; }
+
+    // Grab the global unit state directly from the main module
+    var currentUnit = Units.getUnit();
+    
+    // Convert to KG for storage if entered in LB
+    var weightKg = currentUnit === 'lb' ? +(weightVal / 2.20462).toFixed(2) : weightVal;
+
+    var restore = btnLoading(this);
+    API.call('saveProgress', { date: dateVal, bodyWeight: weightKg, notes: 'Starting weight' })
+      .then(function() {
+        restore();
+        Toast.success('Starting weight saved! ✅');
+        State.remove('progress');
+        State.remove('dashboardSummary');
+        Pages.home.load();
+      }).catch(function(err) {
+        restore();
+        Toast.error('Save failed: ' + err.message);
+      });
+  });
+
+  /* -- Clear Weight History button ------------------------------ */
+  document.getElementById('clear-weight-history-btn').addEventListener('click', function() {
+    showConfirm('This will delete ALL weight history from the Progress sheet. This cannot be undone.', 'Clear History').then(function(ok) {
+      if (!ok) return;
+      State.remove('progress');
+      State.remove('dashboardSummary');
+      API.call('clearWeightHistory').then(function() {
+        Toast.success('Weight history cleared.');
+        Pages.home.load();
+      }).catch(function() {
+        Toast.info('History cleared from this device. Re-open the app to sync.');
+        Pages.home.load();
+      });
+    });
+  });
+})();
 /* ================================================================
    20. PAGE — PROFILE (CORRECTED)
 ================================================================ */
@@ -7752,7 +8046,7 @@ Pages.profile = (function () {
       });
     }
 
-    // Fetch fresh data in the background to update cache
+    // Fetch fresh data in the background to update cache and re-render
     Promise.all([API.call('getDashboardSummary'), API.call('getProgress')])
       .then(function(res) {
         var dash = res[0];
@@ -7760,8 +8054,11 @@ Pages.profile = (function () {
         if (dash) {
           State.set('user', dash.user);
           State.set('workouts', dash.recentWorkouts || []);
+          State.set('splits', dash.splits || []);
         }
         State.set('progress', prog);
+        // Re-render profile with fresh data now that it's loaded
+        load();
       }).catch(function(){});
   }
   
