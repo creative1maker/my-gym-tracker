@@ -3442,6 +3442,10 @@
      margin-bottom: 12px
   }
 
+  .mb-16 {
+     margin-bottom: 16px
+  }
+
   .w-full {
      width: 100%
   }
@@ -3562,6 +3566,85 @@
   #ai-analyze-btn:disabled {
     opacity: .6;
     cursor: not-allowed;
+  }
+
+  /* FIX: AI result card visibility */
+  .ai-result-card {
+    display: none;
+  }
+  .ai-result-card.visible {
+    display: block;
+  }
+
+  /* Rest Timer Modal */
+  #rest-timer-bar {
+    position: fixed;
+    bottom: calc(var(--bottomnav-h) + 12px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-surface);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-xl);
+    padding: 10px 20px;
+    display: none;
+    align-items: center;
+    gap: 14px;
+    z-index: 400;
+    box-shadow: var(--shadow-lg), var(--shadow-accent);
+    min-width: 260px;
+    justify-content: space-between;
+  }
+  @media(min-width:768px) {
+    #rest-timer-bar { bottom: 24px; }
+  }
+  #rest-timer-bar.visible { display: flex; }
+  .rest-timer-display {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    color: var(--accent);
+    line-height: 1;
+    min-width: 56px;
+    text-align: center;
+  }
+  .rest-timer-label {
+    font-family: var(--font-mono);
+    font-size: .68rem;
+    color: var(--text-muted);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+  .rest-timer-btns {
+    display: flex;
+    gap: 6px;
+  }
+  .rest-timer-btns button {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .8rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background var(--dur-fast), color var(--dur-fast);
+  }
+  .rest-timer-btns button:hover { background: var(--accent-subtle); color: var(--accent); }
+  .rest-timer-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: var(--accent);
+    border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+    transition: width 1s linear;
+  }
+
+  /* Workout history card spacing */
+  #page-workout-history .card.mb-16 {
+    margin-bottom: 16px;
   }
   </style>
 </head>
@@ -4111,6 +4194,14 @@
               <option value="Full Gym">Full Gym</option><option value="Home Gym">Home Gym (limited)</option><option value="Dumbbells Only">Dumbbells Only</option><option value="Bodyweight Only">Bodyweight Only</option><option value="Barbell & Rack">Barbell &amp; Rack</option>
             </select>
           </div>
+          <div class="form-group"><label class="form-label" for="set-active-split">Current Split</label><select class="form-input" id="set-active-split"><option value="">— None selected —</option></select></div>
+          <div class="form-group"><label class="form-label" for="set-weight-goal">Weight Goal</label>
+            <select class="form-input" id="set-weight-goal">
+              <option value="lose">Lose Weight</option>
+              <option value="gain">Gain Weight</option>
+              <option value="maintain">Maintain Weight</option>
+            </select>
+          </div>
         </div>
       </div>
       <div class="settings-section">
@@ -4130,11 +4221,6 @@
           <div class="settings-row" style="margin-bottom:8px;">
             <div><div class="settings-row-label">Unit</div></div>
             <div class="kg-lb-toggle">
-              <button class="kg-lb-btn" id="sw-unit-kg" data-sw-unit="kg">KG</button>
-              <button class="kg-lb-btn" id="sw-unit-lb" data-sw-unit="lb">LB</button>
-            </div>
-
-            <div class="kg-lb-toggle">
               <button class="kg-lb-btn" id="sw-unit-kg" data-unit="kg">KG</button>
               <button class="kg-lb-btn" id="sw-unit-lb" data-unit="lb">LB</button>
             </div>
@@ -4144,9 +4230,6 @@
           <button class="btn btn-danger btn-sm" id="clear-weight-history-btn" style="width:100%;">🗑 Clear All Weight History</button>
         </div>
       </div>
-        <div class="settings-section-body">
-          <div class="form-group"><label class="form-label" for="set-active-split">Current Split</label><select class="form-input" id="set-active-split"><option value="">— None selected —</option></select></div>
-        </div>
       <div class="settings-section">
         <div class="settings-section-header">Units &amp; Display</div>
         <div class="settings-section-body">
@@ -4469,6 +4552,20 @@
   </div>
 </div>
 
+<!-- Rest Timer Bar -->
+<div id="rest-timer-bar">
+  <div style="position:relative;">
+    <div class="rest-timer-label">REST TIMER</div>
+    <div class="rest-timer-display" id="rest-timer-display">1:30</div>
+  </div>
+  <div class="rest-timer-btns">
+    <button id="rest-timer-minus" title="-15s">−</button>
+    <button id="rest-timer-plus" title="+15s">+</button>
+    <button id="rest-timer-skip" title="Skip" style="background:var(--accent);color:#fff;border-color:var(--accent);">▶</button>
+  </div>
+  <div class="rest-timer-progress" id="rest-timer-progress"></div>
+</div>
+
 <!-- Toast -->
 <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
@@ -4738,7 +4835,9 @@ var API = (function () {
           _mockProgress[measIdx].measurements = data.measurements;
           _mockProgress[measIdx].measUnit = data.measUnit;
         } else {
-          _mockProgress.push({ date: data.date, bodyWeight: 0, measurements: data.measurements, measUnit: data.measUnit, notes: data.notes || '' });
+          // Find the latest known body weight to avoid storing 0
+          var latestWeight = _mockProgress.length > 0 ? _mockProgress[_mockProgress.length - 1].bodyWeight : null;
+          _mockProgress.push({ date: data.date, bodyWeight: latestWeight || 0, measurements: data.measurements, measUnit: data.measUnit, notes: data.notes || '' });
         }
         return { ok: true };
       }
@@ -4818,6 +4917,9 @@ var API = (function () {
       case 'aiMacros': {
         return { calories: 2650, protein: 185, carbs: 305, fats: 72,
           rationale: 'Mock plan: adjust protein for muscle gain at moderate activity.' };
+      }
+      case 'aiAnalyzeSession': {
+        return { analysis: '🏋️ Great session! Good volume distribution across all exercises. Your intensity was solid — consider increasing weight by 2.5kg on your compound movements next session. Recovery tip: make sure you\'re getting 7-8 hours of sleep. Keep crushing it! 💪' };
       }
       default: throw new Error('Unknown mock action: ' + action);
     }
@@ -5831,6 +5933,13 @@ Pages.log = (function () {
     tr.querySelectorAll('input')[1].addEventListener('input', function () {
       _logData[exIdx].sets[setIdx].weight = this.value;
     });
+    // Start rest timer when user completes a set (both reps and weight filled, then leaves the weight field)
+    tr.querySelectorAll('input')[1].addEventListener('blur', function () {
+      var setData = _logData[exIdx].sets[setIdx];
+      if (setData.reps && setData.weight) {
+        RestTimer.start();
+      }
+    });
     tr.querySelector('.delete-set-btn').addEventListener('click', function () {
       _logData[exIdx].sets.splice(setIdx, 1);
       tr.remove();
@@ -5852,6 +5961,7 @@ Pages.log = (function () {
     changeDayBtn.addEventListener('click', function () {
       document.getElementById('log-exercise-form').style.display = 'none';
       document.getElementById('log-footer').style.display = 'none';
+      document.getElementById('log-step-select').style.display = 'flex';
       document.querySelectorAll('.day-option').forEach(function(opt) {
           opt.classList.remove('selected');
           opt.setAttribute('aria-checked', 'false');
@@ -5871,7 +5981,7 @@ Pages.log = (function () {
 
   function _addExtraExercise() {
     var idx = _logData.length;
-    _logData.push({ name: '', targetSets: 3, targetReps: '', sets: [{ reps: '', weight: '' }], notes: '' });
+    _logData.push({ name: '', targetSets: 3, targetReps: '', sets: [{ reps: '', weight: '' }], notes: '', unit: Units.getUnit() });
 
     var card = document.createElement('div');
     card.className = 'exercise-log-card';
@@ -6335,7 +6445,17 @@ Pages.progress = (function () {
     var chEl = document.getElementById('prog-change');
     if (change != null) {
       chEl.textContent = (change > 0 ? '+' : '') + change;
-      chEl.className   = 'progress-stat-value ' + (parseFloat(change) > 0 ? 'positive' : parseFloat(change) < 0 ? 'negative' : 'neutral');
+      // Determine color based on weight goal
+      var weightGoal = State.get('weightGoal') || 'lose';
+      var isPositive = parseFloat(change) > 0;
+      var isNegative = parseFloat(change) < 0;
+      var colorClass = 'neutral';
+      if (weightGoal === 'lose') {
+        colorClass = isNegative ? 'positive' : isPositive ? 'negative' : 'neutral';
+      } else if (weightGoal === 'gain') {
+        colorClass = isPositive ? 'positive' : isNegative ? 'negative' : 'neutral';
+      }
+      chEl.className = 'progress-stat-value ' + colorClass;
     } else { 
       chEl.textContent = '—'; 
       chEl.className = 'progress-stat-value neutral'; 
@@ -6384,8 +6504,9 @@ Pages.progress = (function () {
       
       if (prev && row.bodyWeight && prev.bodyWeight) {
         var d = (Units.toDisplay(row.bodyWeight) - Units.toDisplay(prev.bodyWeight)).toFixed(1);
-        if (d > 0) { delta = '+' + d; dCls = 'delta-up'; } 
-        else if (d < 0) { delta = d; dCls = 'delta-down'; } 
+        var wGoal = State.get('weightGoal') || 'lose';
+        if (d > 0) { delta = '+' + d; dCls = wGoal === 'lose' ? 'delta-down' : 'delta-up'; } 
+        else if (d < 0) { delta = d; dCls = wGoal === 'lose' ? 'delta-up' : 'delta-down'; } 
         else { delta = '0'; }
       }
 
@@ -6788,9 +6909,43 @@ Pages.exercises = (function () {
           var csv = document.getElementById('add-ex-csv-text').value.trim();
           if (!csv) { Toast.error('Paste some CSV data first.'); return; }
           
+          // Proper CSV parser that handles quoted fields
+          function parseCSVLine(line) {
+            var fields = [];
+            var current = '';
+            var inQuotes = false;
+            for (var ci = 0; ci < line.length; ci++) {
+              var ch = line[ci];
+              if (ch === '"') {
+                if (inQuotes && ci + 1 < line.length && line[ci + 1] === '"') {
+                  current += '"'; ci++; // escaped quote
+                } else {
+                  inQuotes = !inQuotes;
+                }
+              } else if (ch === ',' && !inQuotes) {
+                fields.push(current.trim());
+                current = '';
+              } else {
+                current += ch;
+              }
+            }
+            fields.push(current.trim());
+            // Strip surrounding quotes from fields
+            return fields.map(function(f) {
+              return f.replace(/^["']|["']$/g, '').trim();
+            });
+          }
+          
           var lines = csv.split('\n');
-          lines.forEach(function(line) {
-            var parts = line.split(',');
+          // Detect if first line is a header row
+          var firstLine = lines[0].toLowerCase();
+          var startIdx = 0;
+          if (firstLine.indexOf('exercise') > -1 || firstLine.indexOf('name') > -1) {
+            startIdx = 1; // skip header
+          }
+          
+          for (var li = startIdx; li < lines.length; li++) {
+            var parts = parseCSVLine(lines[li]);
             if (parts[0] && parts[0].trim()) {
               payload.push({
                 name: parts[0].trim(),
@@ -6798,11 +6953,11 @@ Pages.exercises = (function () {
                 equipment: parts[2] ? parts[2].trim() : '',
                 category: parts[3] ? parts[3].trim() : 'Strength',
                 difficulty: parts[4] ? parts[4].trim() : 'Intermediate',
-                shortDemo: '',
-                inDepth: ''
+                shortDemo: parts[5] ? parts[5].trim() : '',
+                inDepth: parts[6] ? parts[6].trim() : ''
               });
             }
-          });
+          }
           if (!payload.length) { Toast.error('No valid exercises found in CSV.'); return; }
         }
 
@@ -7124,6 +7279,12 @@ Pages['workout-history'] = (function () {
 
     // --- 1. Exercise list for Selected Date ---
     var dateWorkouts = _workouts.filter(function (w) { return w.date === dateFilter; });
+    // Also filter by split if selected
+    if (splitFilter) {
+      dateWorkouts = dateWorkouts.filter(function(w) {
+        return _getSplitForDay(w.splitDay) === splitFilter;
+      });
+    }
     var scorecardsWrap = document.getElementById('history-scorecards');
     var analyzeBtn = document.getElementById('ai-analyze-btn');
     var analysisPanel = document.getElementById('ai-analysis-panel');
@@ -7235,23 +7396,12 @@ Pages['workout-history'] = (function () {
       '4. A short motivational closing\n\n' +
       'Keep it concise (under 200 words), practical, and encouraging.\n\nSession:\n' + workoutSummary;
 
-    fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    })
-    .then(function(r) { return r.json(); })
+    API.call('aiAnalyzeSession', { prompt: prompt })
     .then(function(data) {
       spinner.style.display = 'none';
       btn.disabled = false;
-      if (data && data.content && data.content[0] && data.content[0].text) {
-        textDiv.textContent = data.content[0].text;
-      } else if (data && data.error) {
-        textDiv.textContent = '⚠️ API error: ' + (data.error.message || JSON.stringify(data.error));
+      if (data && data.analysis) {
+        textDiv.textContent = data.analysis;
       } else {
         textDiv.textContent = '⚠️ Unexpected response. Please try again.';
       }
@@ -7771,6 +7921,7 @@ Pages.settings=(function(){
     document.getElementById('set-email').value=u.email||'';
     document.getElementById('set-goal').value=u.goal||'Build Muscle';
     document.getElementById('set-equipment').value=u.equipment||'Full Gym';
+    document.getElementById('set-weight-goal').value = State.get('weightGoal') || 'lose';
 // Load local storage keys
     document.getElementById('set-gas-url').value = State.get('gasUrl') || '';
 
@@ -7838,6 +7989,8 @@ document.getElementById('save-settings-btn').addEventListener('click',function()
   var goal = document.getElementById('set-goal').value;
   var equipment = document.getElementById('set-equipment').value;
   var split = document.getElementById('set-active-split').value;
+  var weightGoal = document.getElementById('set-weight-goal').value;
+  State.set('weightGoal', weightGoal);
   
   // Save local configuration keys
   var gasUrl = document.getElementById('set-gas-url').value.trim();
@@ -8180,6 +8333,76 @@ var SyncQueue = (function() {
   update(); // Run once on init
 })();
 
+
+/* ================================================================
+   REST TIMER
+   Auto-pops up after logging a set with configurable duration
+================================================================ */
+var RestTimer = (function() {
+  var _duration = 90; // default 90 seconds
+  var _remaining = 0;
+  var _interval = null;
+  var _bar = document.getElementById('rest-timer-bar');
+  var _display = document.getElementById('rest-timer-display');
+  var _progress = document.getElementById('rest-timer-progress');
+
+  function _format(s) {
+    var m = Math.floor(s / 60);
+    var sec = s % 60;
+    return m + ':' + (sec < 10 ? '0' : '') + sec;
+  }
+
+  function start(dur) {
+    stop();
+    _duration = dur || parseInt(State.get('restTimerDuration')) || 90;
+    _remaining = _duration;
+    _display.textContent = _format(_remaining);
+    _bar.classList.add('visible');
+    _progress.style.width = '100%';
+
+    _interval = setInterval(function() {
+      _remaining--;
+      _display.textContent = _format(Math.max(0, _remaining));
+      _progress.style.width = ((_remaining / _duration) * 100) + '%';
+      if (_remaining <= 0) {
+        _onComplete();
+      }
+    }, 1000);
+  }
+
+  function _onComplete() {
+    stop();
+    // Play a subtle vibration if supported
+    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+    Toast.info('Rest complete — time to lift! 💪');
+  }
+
+  function stop() {
+    clearInterval(_interval);
+    _interval = null;
+    _bar.classList.remove('visible');
+  }
+
+  function adjustTime(delta) {
+    _duration = Math.max(15, _duration + delta);
+    _remaining = Math.max(0, _remaining + delta);
+    _display.textContent = _format(Math.max(0, _remaining));
+    State.set('restTimerDuration', _duration);
+  }
+
+  // Wire buttons
+  if (document.getElementById('rest-timer-minus')) {
+    document.getElementById('rest-timer-minus').addEventListener('click', function() { adjustTime(-15); });
+  }
+  if (document.getElementById('rest-timer-plus')) {
+    document.getElementById('rest-timer-plus').addEventListener('click', function() { adjustTime(15); });
+  }
+  if (document.getElementById('rest-timer-skip')) {
+    document.getElementById('rest-timer-skip').addEventListener('click', function() { stop(); });
+  }
+
+  return { start: start, stop: stop };
+})();
 
 /* ================================================================
    23.  MASTER BOOTSTRAP (INIT)
