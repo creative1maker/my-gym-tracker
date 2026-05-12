@@ -6634,21 +6634,33 @@ Pages.nutrition = (function () {
           restore();
           document.getElementById('macro-ai-thinking').classList.remove('visible');
           var resBox = document.getElementById('macro-ai-result');
+
+          var cal  = parseInt(result.calories) || 0;
+          var pro  = parseInt(result.protein)  || 0;
+          var carb = parseInt(result.carbs)    || 0;
+          var fat  = parseInt(result.fats)     || 0;
+
+          if (!cal) {
+            resBox.style.display = 'flex';
+            resBox.innerHTML = '<div class="badge" style="background:var(--danger-subtle);color:var(--danger);align-self:flex-start;">⚠️ Unexpected Response</div><p class="text-sm text-secondary" style="margin-top:6px;">The AI returned an empty plan. Try rephrasing your description with more detail (e.g. "75kg male, 25% body fat, moderate activity, goal: lose weight").</p>';
+            resBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            return;
+          }
+
           resBox.style.display = 'flex';
-          var cal  = result.calories || 0;
-          var pro  = result.protein  || 0;
-          var carb = result.carbs    || 0;
-          var fat  = result.fats     || 0;
           resBox.innerHTML =
             '<div class="badge badge-accent" style="align-self:flex-start;">\u2728 AI Plan Generated</div>' +
             (result.rationale ? '<p class="text-sm text-secondary" style="margin-top:6px;">' + esc(result.rationale) + '</p>' : '') +
             '<div class="macro-goals-grid mt-8">' +
               '<div class="stat-card"><div class="stat-card-label">Cals</div><div class="stat-card-value accent">' + cal  + '</div></div>' +
-              '<div class="stat-card"><div class="stat-card-label">Pro</div><div class="stat-card-value">'  + pro  + '</div></div>' +
-              '<div class="stat-card"><div class="stat-card-label">Carb</div><div class="stat-card-value">' + carb + '</div></div>' +
-              '<div class="stat-card"><div class="stat-card-label">Fat</div><div class="stat-card-value">'  + fat  + '</div></div>' +
+              '<div class="stat-card"><div class="stat-card-label">Pro</div><div class="stat-card-value">'  + pro  + 'g</div></div>' +
+              '<div class="stat-card"><div class="stat-card-label">Carb</div><div class="stat-card-value">' + carb + 'g</div></div>' +
+              '<div class="stat-card"><div class="stat-card-label">Fat</div><div class="stat-card-value">'  + fat  + 'g</div></div>' +
             '</div>' +
             '<button class="btn btn-secondary btn-sm mt-8" id="apply-ai-macros-btn"><span class="btn-text">Apply as Daily Goals</span></button>';
+
+          // Auto-scroll to result
+          resBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
           document.getElementById('apply-ai-macros-btn').addEventListener('click', function() {
             var user = State.get('user') || {};
@@ -6668,7 +6680,14 @@ Pages.nutrition = (function () {
         }).catch(function(err) {
           restore();
           document.getElementById('macro-ai-thinking').classList.remove('visible');
-          Toast.error('AI error: ' + err.message);
+          // Show error persistently in the result box so user doesn't miss it
+          var resBox = document.getElementById('macro-ai-result');
+          resBox.style.display = 'flex';
+          resBox.innerHTML =
+            '<div class="badge" style="background:var(--danger-subtle);color:var(--danger);align-self:flex-start;">⚠️ AI Error</div>' +
+            '<p class="text-sm text-secondary" style="margin-top:6px;">' + esc(err.message) + '</p>' +
+            '<p class="text-sm text-muted" style="margin-top:4px;">Check that your GAS URL is saved in Settings, your Script Properties contain the Gemini key, and the latest Code.gs is deployed as a web app.</p>';
+          resBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         });
       });
     }
